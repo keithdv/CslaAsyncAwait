@@ -12,11 +12,11 @@ namespace CslaAsyncAwait.Lib.Server
         : IDataPortalActivator, IDataPortalActivatorServer
     {
 
-        private const string LocalContextKey = "GridsDataPortalActivator.scopeKeys";
-        private const string GridsDataPortalActivatorKey = "GridsDataPortalActivator.ThreadScopeKey";
+        private const string LocalContextKey = "DataPortalActivator.scopeKeys";
+        private const string DataPortalActivatorKey = "DataPortalActivator.ThreadScopeKey";
 
 
-        internal class ScopeMetadata
+        public class ScopeMetadata
         {
             public ScopeMetadata()
             {
@@ -40,7 +40,7 @@ namespace CslaAsyncAwait.Lib.Server
         {
             get
             {
-                return _iocContainer ?? (ILifetimeScope)_contextAdapter.LocalContext[GridsDataPortalActivatorKey];
+                return _iocContainer ?? (ILifetimeScope)_contextAdapter.LocalContext[DataPortalActivatorKey];
             }
             set
             {
@@ -48,7 +48,7 @@ namespace CslaAsyncAwait.Lib.Server
                 // and setting the property which stores the container in thread context
                 // Use one or the other - usually client and server (AutofacWcfPortal)
                 _iocContainer = null;
-                _contextAdapter.LocalContext[GridsDataPortalActivatorKey] = value;
+                _contextAdapter.LocalContext[DataPortalActivatorKey] = value;
             }
         }
 
@@ -64,7 +64,7 @@ namespace CslaAsyncAwait.Lib.Server
             }
         }
 
-        internal Stack<ScopeMetadata> scopeStack
+        public Stack<ScopeMetadata> scopeStack
         {
 
             get
@@ -82,7 +82,7 @@ namespace CslaAsyncAwait.Lib.Server
         }
 
         /// <summary>
-        /// constructs a GridsObjectActivator assuming it is the server
+        /// constructs a ObjectActivator assuming it is the server
         /// Since the container is not sent in with the constructor it needs to be set
         /// using the container property
         /// </summary>
@@ -94,7 +94,7 @@ namespace CslaAsyncAwait.Lib.Server
         }
 
         /// <summary>
-        /// constructs a GridsObjectActivator using the passed in iocContainer
+        /// constructs a ObjectActivator using the passed in iocContainer
         /// </summary>
         /// <param name="iocContainer">The <seealso cref="AutoFac.IContainer"/> to create lifetime scopes with for resolving business object types that implement IBusinessScope</param>
         public DataPortalActivator(IContainer iocContainer)
@@ -142,11 +142,7 @@ namespace CslaAsyncAwait.Lib.Server
                 {
                     throw new Exception(requestedType.FullName);
                 }
-                else if (registration == null)
-                {
-                    return null;
-                }
-                else
+                else if (registration != null)
                 {
                     IInstanceActivator activator = registration.Activator as IInstanceActivator;
                     requestedType = activator.LimitType;
@@ -218,12 +214,12 @@ namespace CslaAsyncAwait.Lib.Server
     }
 
     [Serializable]
-    public class LegacyGridsBusinessScopeUsageException : Exception
+    public class LegacyBusinessScopeUsageException : Exception
     {
-        public LegacyGridsBusinessScopeUsageException() { }
-        public LegacyGridsBusinessScopeUsageException(string message) : base(message) { }
-        public LegacyGridsBusinessScopeUsageException(string message, Exception inner) : base(message, inner) { }
-        protected LegacyGridsBusinessScopeUsageException(
+        public LegacyBusinessScopeUsageException() { }
+        public LegacyBusinessScopeUsageException(string message) : base(message) { }
+        public LegacyBusinessScopeUsageException(string message, Exception inner) : base(message, inner) { }
+        protected LegacyBusinessScopeUsageException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context)

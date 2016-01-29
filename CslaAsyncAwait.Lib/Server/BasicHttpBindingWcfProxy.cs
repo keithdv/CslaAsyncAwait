@@ -21,7 +21,7 @@ namespace CslaAsyncAwait.Lib.Server
         {
             //ChannelFactory<IWcfPortal> factory;
 
-            //factory = new ChannelFactory<IWcfPortal>("GRiDSDataPortalEndpoint");
+            //factory = new ChannelFactory<IWcfPortal>("DataPortalEndpoint");
 
             //return factory;
 

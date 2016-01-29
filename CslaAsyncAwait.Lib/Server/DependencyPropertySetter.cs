@@ -53,7 +53,7 @@ namespace CslaAsyncAwait.Lib.Server
                         //this should not be too expensive from a performance standpoint because we only do it if both conditions of
                         //1: the object is going to come back to the client side - AND - 
                         //2: the object implements the IDisposable interface 
-                        //(which will not happen very often except in the case of bringing back IGridsObjectPortal<T> types)
+                        //(which will not happen very often except in the case of bringing back IObjectPortal<T> types)
                         //if ((atb.DependencyScope == ResolutionScope.Client || atb.DependencyScope == ResolutionScope.ClientAndServer)
                         //    && typeof(IDisposable).IsAssignableFrom(depPropInstance.GetType()))
                         //{

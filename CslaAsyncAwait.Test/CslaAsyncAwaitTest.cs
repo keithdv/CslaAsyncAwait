@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows.Threading;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using CslaAsyncAwait.Lib.Server;
 
 namespace CslaAsyncAwait.Test
 {
@@ -14,10 +15,43 @@ namespace CslaAsyncAwait.Test
     public class CslaAsyncAwaitTest
     {
 
-        [AssemblyInitialize]
-        public static void AssemblyInitialize(TestContext c)
+        private const string key = "CslaAsyncAwaitTestKey";
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext c)
         {
-            Csla.ApplicationContext.ContextManager = new Csla.Test.AppContext.TestContext();
+
+            ContextManager = Csla.ApplicationContext.ContextManager;
+
+            // Senario 1 - Leave ContextManager the default
+            // Loose Csla.ApplicationContext.User at the end of the await call
+            // 3 [Async] Unit Test fail
+
+            // Senario 2 - Put use into a static manager
+            // Works but now all of the async calls shard a ContextDictionary
+            // which is what we don't want (for things like storing a scope)
+            // Fail do to the "Assert.IsNull(Csla.ApplicationContext.LocalContext[key]);" statements
+            //Csla.ApplicationContext.ContextManager = new Csla.Test.AppContext.StaticContextManager();
+
+            // Very close to what we want
+            // CallContext is working how I would expect
+            // The only problem is we need to "seed" UniqueIdenfier in the Async call we want the principal to be "alive" in
+
+            // Update:  added ClearCallContext
+            // The async tests fail if Fetch and/or FetchSetContext are ran before them
+            // Which is kinda flaky
+            // I'm guessing because it's seeding "UniqueIdentifier" first
+
+            Csla.ApplicationContext.ContextManager = new CallContextContextManager();
+
+        }
+
+        private static Csla.Core.IContextManager ContextManager;
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            Csla.ApplicationContext.ContextManager = ContextManager;
         }
 
 
@@ -28,6 +62,12 @@ namespace CslaAsyncAwait.Test
             Assert.IsInstanceOfType(princ, typeof(Principal));
 
 
+            // The async tests fail if Fetch and/or FetchSetContext are ran before them
+            // Which is kinda flaky
+            // I'm guessing because it's seeding "UniqueIdentifier" first
+
+            CallContextContextManager.ClearCallContext();
+
         }
 
         [TestMethod]
@@ -36,23 +76,53 @@ namespace CslaAsyncAwait.Test
             Principal.IdealFetchSetContext();
             Assert.IsInstanceOfType(Csla.ApplicationContext.User, typeof(Principal));
 
+
+            // The async tests fail if Fetch and/or FetchSetContext are ran before them
+            // Which is kinda flaky
+            // I'm guessing because it's seeding "UniqueIdentifier" first
+
+            CallContextContextManager.ClearCallContext();
+
         }
 
 
         [TestMethod]
+        [TestCategory("Async")]
         public async Task FetchAsync()
         {
+
+            // This is required so that the CallContext.UniqueIdenfier is set at this top level
+            // How do we get rid of this???
+            Assert.IsNotNull(CallContextContextManager.UniqueIdentifier);
+
             var princ = await Principal.IdealFetchAsync();
             Assert.IsInstanceOfType(princ, typeof(Principal));
 
+            // See if we are getting carry-over data from other unit tests into this unit test
+            var x = Csla.ApplicationContext.LocalContext[key];
+            Assert.IsNull(x, CallContextContextManager.UniqueIdentifier.ToString());
+            Csla.ApplicationContext.LocalContext[key] = "FetchAsync";
         }
 
+
+
         [TestMethod]
+        [TestCategory("Async")]
         public async Task FetchSetContextAsync()
         {
+
+            // This is required so that the CallContext.UniqueIdenfier is set at this top level
+            // How do we get rid of this???
+            Assert.IsNotNull(CallContextContextManager.UniqueIdentifier);
+
             await Principal.IdealFetchSetContextAsync();
             // In WPF we would still have the correct CslaAsyncAwait.Lib.Principal in Csla.ApplicationContext.User
             Assert.IsInstanceOfType(Csla.ApplicationContext.User, typeof(Principal));
+
+            // See if we are getting carry-over data from other unit tests into this unit test
+            var x = Csla.ApplicationContext.LocalContext[key];
+            Assert.IsNull(x, CallContextContextManager.UniqueIdentifier.ToString());
+            Csla.ApplicationContext.LocalContext[key] = "FetchSetContextAsync";
 
         }
 
@@ -62,14 +132,72 @@ namespace CslaAsyncAwait.Test
             // In WPF we would still have the correct CslaAsyncAwait.Lib.Principal in Csla.ApplicationContext.User
             Assert.IsInstanceOfType(Csla.ApplicationContext.User, typeof(Principal));
 
+            // See if we are getting carry-over data from other unit tests into this unit test
+            var x = Csla.ApplicationContext.LocalContext[key];
+            Assert.IsNull(x, CallContextContextManager.UniqueIdentifier.ToString());
+            Csla.ApplicationContext.LocalContext[key] = new object();
+
         }
 
         [TestMethod]
-        public async Task FetchSetContextAsync_Nito()
+        [TestCategory("Async")]
+        public async Task FetchSetContextAsync_1()
         {
-            await Nito.AsyncEx.AsyncContext.Run<Task>((Func<Task>)IdealFetchSetContextAsync);
+
+            // This is required so that the CallContext.UniqueIdenfier is set at this top level
+            // How do we get rid of this???
+            Assert.IsNotNull(CallContextContextManager.UniqueIdentifier);
+
+            await Principal.IdealFetchSetContextAsync();
+            // In WPF we would still have the correct CslaAsyncAwait.Lib.Principal in Csla.ApplicationContext.User
+            Assert.IsInstanceOfType(Csla.ApplicationContext.User, typeof(Principal));
+
+            // See if we are getting carry-over data from other unit tests into this unit test
+            var x = Csla.ApplicationContext.LocalContext[key];
+            Assert.IsNull(x, CallContextContextManager.UniqueIdentifier.ToString());
+            Csla.ApplicationContext.LocalContext[key] = "FetchSetContextAsync_1";
+
         }
 
+        [TestMethod]
+        [TestCategory("Async")]
+        public async Task FetchSetContextAsync_2()
+        {
+
+            // This is required so that the CallContext.UniqueIdenfier is set at this top level
+            // How do we get rid of this???
+            Assert.IsNotNull(CallContextContextManager.UniqueIdentifier);
+
+            await Principal.IdealFetchSetContextAsync();
+            // In WPF we would still have the correct CslaAsyncAwait.Lib.Principal in Csla.ApplicationContext.User
+            Assert.IsInstanceOfType(Csla.ApplicationContext.User, typeof(Principal));
+
+            // See if we are getting carry-over data from other unit tests into this unit test
+            var x = Csla.ApplicationContext.LocalContext[key];
+            Assert.IsNull(x, CallContextContextManager.UniqueIdentifier.ToString());
+            Csla.ApplicationContext.LocalContext[key] = "FetchSetContextAsync_2";
+
+        }
+
+        [Ignore]
+        [TestMethod]
+        [TestCategory("Async")]
+        public async Task FetchSetContextAsync_Nito()
+        {
+            // This is required so that the CallContext.UniqueIdenfier is set at this top level
+            // How do we get rid of this???
+            Assert.IsNotNull(CallContextContextManager.UniqueIdentifier);
+
+            await Nito.AsyncEx.AsyncContext.Run<Task>((Func<Task>)IdealFetchSetContextAsync);
+
+            // See if we are getting carry-over data from other unit tests into this unit test
+            var x = Csla.ApplicationContext.LocalContext[key];
+            Assert.IsNull(x, (x ?? "").ToString());
+            Csla.ApplicationContext.LocalContext[key] = new object();
+
+        }
+
+        [Ignore]
         [TestMethod]
         public void FetchSetContextAsync_Dispatcher()
         {
@@ -110,12 +238,14 @@ namespace CslaAsyncAwait.Test
             }
         }
 
+        [Ignore]
         [TestMethod]
         public void FetchSetContextAsync_AsyncPump_RunTask()
         {
             AsyncPump.Run((Func<Task>)IdealFetchSetContextAsync);
         }
 
+        [Ignore]
         [TestMethod]
         public void FetchSetContextAsync_AsyncPump_RunVoid()
         {

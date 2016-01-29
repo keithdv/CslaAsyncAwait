@@ -27,7 +27,7 @@ namespace CslaAsyncAwait.Lib.Server
         public AutofacWcfPortal(ILifetimeScope scope)
         {
             this._scope = scope;
-            // Since IGridsDataPortalActivatorServer is internal it can't be on a public constructor
+            // Since IDataPortalActivatorServer is internal it can't be on a public constructor
             // AutofacWcfPortal can't be internal because it needs to be in the Web.Config of the IIS WCF Application
             this._dataPortalActivator = scope.Resolve<IDataPortalActivatorServer>();
             this._dataPortalActivator.Container = scope; // This property is in Localcontext so it needs to be set percall

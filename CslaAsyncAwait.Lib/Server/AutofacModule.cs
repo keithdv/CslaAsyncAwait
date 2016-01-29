@@ -13,14 +13,19 @@ namespace CslaAsyncAwait.Lib.Server
         {
             base.Load(builder);
 
-            builder.RegisterType<AutofacWcfPortal>().AsSelf();
+            builder.RegisterGeneric(typeof(ObjectPortal<>)).As(typeof(IObjectPortal<>));
 
-            builder.RegisterType<ContextAdapter>().As<IContextAdapter>();
+            builder.RegisterType<AutofacWcfPortal>().AsSelf();
 
             builder.RegisterType<DataPortalActivator>()
                 .As<IDataPortalActivator>()
                 .As<IDataPortalActivatorServer>()
                 .InstancePerLifetimeScope();
+
+            builder.RegisterType<UniqueValueClass>().As<IUniqueValue>().InstancePerLifetimeScope();
+
+            builder.RegisterAssemblyTypes(ThisAssembly).AsImplementedInterfaces().PreserveExistingDefaults();
+
         }
 
     }
