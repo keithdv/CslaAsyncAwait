@@ -45,9 +45,17 @@
       <HintPath>..\packages\CSLA-Core.4.6.200\lib\net46\Csla.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="EntityFramework">
+      <HintPath>..\..\EntityFramework\entityframework-08b39e0358c0fbe951cff42efd3493d532d46d1a\bin\Debug\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\EntityFramework\entityframework-08b39e0358c0fbe951cff42efd3493d532d46d1a\bin\Debug\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Activation" />
     <Reference Include="System.Xml.Linq" />

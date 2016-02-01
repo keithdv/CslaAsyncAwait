@@ -15,6 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Autofac;
+using System.Xml.Schema;
+using System.IO;
 
 namespace CslaAsyncAwait
 {
@@ -162,6 +164,53 @@ namespace CslaAsyncAwait
             return builder;
         }
 
+        
+        public void CreateEntityFrameworkError()
+        {
 
+            var scope = Builder().Build().BeginLifetimeScope();
+
+            // This errors in MSTest but doesn't seem to error in WPF
+
+            // THis describes the error and the 'workaround' though it's pretty weak
+            // https://msdn.microsoft.com/en-us/library/dn458353(v=vs.110).aspx
+            //System.Configuration.ConfigurationManager.GetSection("system.xml/xmlReader"); // Workaround - Fails if this is commented out
+
+            CallContext.LogicalSetData("CslaAsyncAwait.UnitTest", scope);
+
+            AddXmlSchemaToSet(new XmlSchemaSet());
+
+            // If you don't set this to null you get an error 
+            // from MSTEST and the test is not marked completed
+            CallContext.LogicalSetData("CslaAsyncAwait.UnitTest", null);
+
+        }
+
+        // This is the code that is erroring in Entity Framework Core.Schema object
+        private static void AddXmlSchemaToSet(XmlSchemaSet schemaSet)
+        {
+            // loop through the children to do a depth first load
+
+
+            var xsdStream = GetResourceStream("System.Data.Resources.ProviderServices.ProviderManifest.xsd");
+            var schema = XmlSchema.Read(xsdStream, null);
+            schemaSet.Add(schema);
+            //schemasAlreadyAdded.Add(schemaResource.NamespaceUri);
+
+        }
+
+        private static Stream GetResourceStream(string resourceName)
+        {
+
+            var resourceStream = typeof(System.Data.Entity.Core.EntityKey).Assembly.GetManifestResourceStream(resourceName);
+
+
+            return resourceStream;
+        }
+
+        private void EntityFrameworkError_Click(object sender, RoutedEventArgs e)
+        {
+            CreateEntityFrameworkError();
+        }
     }
 }

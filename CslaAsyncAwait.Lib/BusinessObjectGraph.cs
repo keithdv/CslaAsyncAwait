@@ -281,6 +281,14 @@ namespace CslaAsyncAwait.Lib
             set { _servDep = value; }
         }
 
+        private void Child_Create()
+        {
+            using (BypassPropertyChecks)
+            {
+                this.UniqueValue = ServerDependency.UniqueValue;
+            }
+        }
+
         private void DataPortal_Fetch()
         {
             using (BypassPropertyChecks)

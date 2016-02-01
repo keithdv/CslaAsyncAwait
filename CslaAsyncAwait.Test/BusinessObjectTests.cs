@@ -4,9 +4,12 @@ using CslaAsyncAwait.Lib.Server;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace CslaAsyncAwait.Test
 {
@@ -36,6 +39,10 @@ namespace CslaAsyncAwait.Test
             //Csla.ApplicationContext.ContextManager = new Csla.Xaml.ApplicationContextManager();
 
 
+            // CallContext
+            Csla.ApplicationContext.ContextManager = new CallContextContextManager();
+
+            
         }
 
         [TestMethod]
@@ -50,6 +57,8 @@ namespace CslaAsyncAwait.Test
             // in the DataPortalActivator
 
             var scope = container.BeginLifetimeScope();
+
+            CallContext.LogicalSetData("CslaAsyncAwait.UnitTest", scope);
 
             var result = scope.Resolve<IObjectPortal<IBO_Parent>>().Fetch();
 
@@ -133,7 +142,7 @@ namespace CslaAsyncAwait.Test
 
             Assert.IsTrue(result.IsNew);
 
-            result = (IBO_Parent) result.Save();
+            result = (IBO_Parent)result.Save();
 
             //var result = await scope.Resolve<IObjectPortal<IBO_Parent>>().FetchAsync();
 
@@ -144,6 +153,7 @@ namespace CslaAsyncAwait.Test
 
             Assert.AreEqual(uniqueID, result.UniqueValue); //This does fail?? 
         }
+
 
     }
 }
