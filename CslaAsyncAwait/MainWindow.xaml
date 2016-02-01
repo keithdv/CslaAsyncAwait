@@ -31,6 +31,8 @@
         <Button Grid.Row="5" Name="SyncAsyncFetchSetContext" Click="SyncAsyncFetchSetContext_Click" Background="Red">SyncAsyncFetchSetContext</Button>
         <Button Grid.Row="6" Name="AsyncSyncFetch" Click="AsyncSyncFetch_Click">AsyncSyncFetch</Button>
         <Button Grid.Row="7" Name="AsyncSyncFetchSetContext" Click="AsyncSyncFetchSetContext_Click">AsyncSyncFetchSetContext</Button>
+        <Button Grid.Row="8" Name="CallContext_Nested_Async_Calls" Click="CallContext_Nested_Async_Calls_Click">Call Context - Nested Async Calls</Button>
+        <Button Grid.Row="9" Name="GCCollect" Click="GCCollect_Click">GC Collect</Button>
 
 
     </Grid>

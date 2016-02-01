@@ -10,14 +10,33 @@ using System.Threading.Tasks;
 namespace CslaAsyncAwait.Lib
 {
 
-    public interface IUniqueValue { Guid UniqueValue { get; } }
-    public class UniqueValueClass : IUniqueValue
+    public interface IUniqueValue : IDisposable { Guid UniqueValue { get; } void Open(); }
+    public class UniqueValueClass : IUniqueValue, IDisposable
     {
         public UniqueValueClass()
         {
             this.UniqueValue = Guid.NewGuid();
+            IsOpen = false;
         }
         public Guid UniqueValue { get; private set; }
+
+        public bool IsOpen { get; private set; }
+
+        public void Open()
+        {
+            if (IsOpen)
+            {
+                throw new Exception("Already open.");
+            }
+
+            IsOpen = true;
+
+        }
+
+        public void Dispose()
+        {
+            IsOpen = false;
+        }
     }
 
     public interface IBO_Parent : Csla.IBusinessBase
@@ -75,30 +94,21 @@ namespace CslaAsyncAwait.Lib
 
         protected void DataPortal_Create()
         {
+            ServerDependency.Open();
             BO_ChildA = Portal.CreateChild();
             BO_ChildA_1 = Portal.CreateChild();
+
         }
 
-        protected async Task DataPortal_Fetch()
+        protected void DataPortal_Fetch()
         {
             using (BypassPropertyChecks)
             {
                 this.UniqueValue = ServerDependency.UniqueValue;
             }
 
-            //this.BO_ChildA = await Portal.FetchAsync();
-            //this.BO_ChildB = await PortalB.FetchAsync();
-            //this.BO_ChildB_1 = await PortalB.FetchAsync();
-
-            List<Task> tasks = new List<Task>();
-
-            tasks.Add(Portal.FetchAsync());
-            tasks.Add(Portal.FetchAsync());
-
-            await Task.WhenAll(tasks);
-
-            this.BO_ChildA = ((Task<IBO_ChildA>)tasks[0]).Result;
-            this.BO_ChildA_1 = ((Task<IBO_ChildA>)tasks[1]).Result;
+            this.BO_ChildA = Portal.Fetch();
+            this.BO_ChildA_1 = Portal.Fetch();
 
         }
 
@@ -160,21 +170,14 @@ namespace CslaAsyncAwait.Lib
             Add(portal.CreateChild());
         }
 
-        private async Task DataPortal_Fetch()
+        private void DataPortal_Fetch()
         {
-            await Task.Delay(500);
 
             this.UniqueValue = ServerDependency.UniqueValue;
 
-            var tasks = new List<Task>();
+            Add(portal.Fetch());
+            Add(portal.Fetch());
 
-            tasks.Add(portal.FetchAsync());
-            tasks.Add(portal.FetchAsync());
-
-            await Task.WhenAll(tasks);
-
-            Add(((Task<IBO_GrandChildA>)tasks[0]).Result);
-            Add(((Task<IBO_GrandChildA>)tasks[1]).Result);
         }
 
     }
@@ -232,12 +235,12 @@ namespace CslaAsyncAwait.Lib
             }
         }
 
-        private async Task DataPortal_Fetch()
+        private void DataPortal_Fetch()
         {
             using (BypassPropertyChecks)
             {
                 this.UniqueValue = ServerDependency.UniqueValue;
-                this.Branch = await portal.FetchAsync(); ;
+                this.Branch = portal.Fetch(); ;
             }
         }
 
@@ -278,11 +281,11 @@ namespace CslaAsyncAwait.Lib
             set { _servDep = value; }
         }
 
-        private async Task DataPortal_Fetch()
+        private void DataPortal_Fetch()
         {
             using (BypassPropertyChecks)
             {
-                this.UniqueValue = await Task.FromResult(ServerDependency.UniqueValue);
+                this.UniqueValue = ServerDependency.UniqueValue;
             }
         }
 

@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusinessObjectGraph.cs" />
+    <Compile Include="CallContextItem.cs" />
     <Compile Include="Server\AutofacModule.cs" />
     <Compile Include="Server\AutofacWcfPortal.cs" />
     <Compile Include="Server\BasicHttpBindingWcfProxy.cs" />
