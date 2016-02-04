@@ -23,6 +23,7 @@ namespace CslaAsyncAwait.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext tc)
         {
+
             ContainerBuilder builder = new ContainerBuilder();
 
             builder.RegisterModule<CslaAsyncAwait.Lib.Server.AutofacModule>();
@@ -42,13 +43,14 @@ namespace CslaAsyncAwait.Test
             // CallContext
             Csla.ApplicationContext.ContextManager = new CallContextContextManager();
 
-            
+
         }
+        
 
         [TestMethod]
         public void Fetch_A()
         {
-
+            
             // Multi-threaded async-await DataPortal-Fetch
             // Honestly I don't know why this is working!!! 
 

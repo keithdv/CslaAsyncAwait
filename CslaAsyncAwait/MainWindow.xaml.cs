@@ -113,7 +113,7 @@ namespace CslaAsyncAwait
             WeakEventManager<ILifetimeScope, Autofac.Core.Lifetime.LifetimeScopeEndingEventArgs>.AddHandler(scope, "CurrentScopeEnding", Scope_CurrentScopeEnding);
 
             //CallContext.LogicalSetData(key1.ToString(), scope);
-            CallContext.LogicalSetData(key1.ToString(), new CallContextItem<ILifetimeScope>(scope));
+            CallContext.LogicalSetData(key1.ToString(), new CallContextItem(scope));
 
             await Nested2();
 
@@ -131,7 +131,7 @@ namespace CslaAsyncAwait
 
             asyncList.Add("Nested4");
 
-            CallContext.LogicalSetData(key2.ToString(), new CallContextItem<object>(new object()));
+            CallContext.LogicalSetData(key2.ToString(), new CallContextItem(new object()));
 
             await Nested3();
         }
@@ -164,7 +164,7 @@ namespace CslaAsyncAwait
             return builder;
         }
 
-        
+
         public void CreateEntityFrameworkError()
         {
 
@@ -190,8 +190,6 @@ namespace CslaAsyncAwait
         private static void AddXmlSchemaToSet(XmlSchemaSet schemaSet)
         {
             // loop through the children to do a depth first load
-
-
             var xsdStream = GetResourceStream("System.Data.Resources.ProviderServices.ProviderManifest.xsd");
             var schema = XmlSchema.Read(xsdStream, null);
             schemaSet.Add(schema);

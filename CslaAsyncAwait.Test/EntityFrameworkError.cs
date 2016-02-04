@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using CslaAsyncAwait.Lib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace CslaAsyncAwait.Test
             // THis describes the error and the 'workaround'
             // though it's pretty weak
             // https://msdn.microsoft.com/en-us/library/dn458353(v=vs.110).aspx
-            System.Configuration.ConfigurationManager.GetSection("system.xml/xmlReader"); // Workaround - Fails if this is commented out
+            // System.Configuration.ConfigurationManager.GetSection("system.xml/xmlReader"); // Workaround - Fails if this is commented out
 
             CallContext.LogicalSetData("CslaAsyncAwait.UnitTest", scope);
 
@@ -62,6 +63,41 @@ namespace CslaAsyncAwait.Test
 
 
             return resourceStream;
+        }
+
+        private ILifetimeScope scope;
+
+        [TestMethod]
+        public async Task CreateEntityFrameworkError_Fix()
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+
+            builder.RegisterModule<CslaAsyncAwait.Lib.Server.AutofacModule>();
+
+            var container = builder.Build();
+
+            scope = container.BeginLifetimeScope();
+
+            // THis describes the error and the 'workaround'
+            // though it's pretty weak
+            // https://msdn.microsoft.com/en-us/library/dn458353(v=vs.110).aspx
+            // System.Configuration.ConfigurationManager.GetSection("system.xml/xmlReader"); // Workaround - Fails if this is commented out
+
+            CallContext.LogicalSetData("CslaAsyncAwait.UnitTest", new CallContextItem(scope));
+
+            AddXmlSchemaToSet(new XmlSchemaSet());
+
+            await CheckCallContext();
+
+        }
+
+        public async Task CheckCallContext()
+        {
+            var result = (CallContextItem) CallContext.LogicalGetData("CslaAsyncAwait.UnitTest");
+
+            Assert.AreSame(scope, result.Item);
+
+            await Task.Delay(1);
         }
 
     }

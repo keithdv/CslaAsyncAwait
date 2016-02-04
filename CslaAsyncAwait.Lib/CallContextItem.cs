@@ -10,37 +10,31 @@ namespace CslaAsyncAwait.Lib
 {
 
     [Serializable]
-    public class CallContextItem<T>
+    public class CallContextItem : MarshalByRefObject
     {
         [NonSerialized]
-        private static Dictionary<Guid, T> itemStore = new Dictionary<Guid, T>();
+        private static Dictionary<Guid, WeakReference> itemStore = new Dictionary<Guid, WeakReference>();
 
-        public CallContextItem(T item)
+        public CallContextItem(object item)
         {
-            itemStore.Add(UniqueIdentifier, item);
+            itemStore.Add(UniqueIdentifier, new WeakReference(item));
         }
 
-        ~CallContextItem()
+
+        public object Item
         {
-            if (itemStore.ContainsKey(UniqueIdentifier))
-            {
-                var dispose = itemStore[UniqueIdentifier] as IDisposable;
+            get {
 
-                if(dispose != null)
-                {
-                    dispose.Dispose();
-                }
+                return itemStore[UniqueIdentifier].Target;
 
-                itemStore.Remove(UniqueIdentifier);
             }
         }
 
-        private Guid _uniqueIdentifier = Guid.NewGuid();
+        private readonly Guid _uniqueIdentifier = Guid.NewGuid();
 
         public Guid UniqueIdentifier
         {
             get { return _uniqueIdentifier; }
-            private set { _uniqueIdentifier = value; }
         }
 
     }
